@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-requester
+  namespace: default
+  labels:
+    app: go-requester
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-requester
+  template:
+    metadata:
+      labels:
+        app: go-requester
+      annotations:
+        #prometheus.io/scrape: "true" //If you want to scrape with prometheus, comment in this line.
+    spec:
+      serviceAccountName: default
+      containers:
+      - name: go-requester
+        image: sota0113/go-requester:alpine
+        #ports:
+        #- containerPort: 8080
+        env:
+        - name: RQ_HOST
+          value: "sample-go"
+        - name: RQ_PROTOCOL
+          value: "http"
+        - name: RQ_PATH
+          value: "list"
+        - name: RQ_PORT
+          value: "8080"

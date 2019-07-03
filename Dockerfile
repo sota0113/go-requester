@@ -10,5 +10,5 @@ COPY --from=build-env /go/src/app/app ./
 ENV RQ_HOST="localhost"
 ENV RQ_PROTOCOL="http"
 ENV RQ_PATH="/list"
-ENV RQ_PORT="3030"
+ENV RQ_PORT="80"
 CMD ["./app"]
