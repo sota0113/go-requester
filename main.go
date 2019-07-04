@@ -3,7 +3,7 @@ import (
 	"fmt"
 	"net/http"
 	"io/ioutil"
-	//"os"
+	"os"
 	"time"
 	"strings"
 	"github.com/kelseyhightower/envconfig"
@@ -14,16 +14,15 @@ type Env struct {
 	Rq_protocol	string	`envconfig:RQ_PROTOCOL`
 	Rq_path	string	`envconfig:RQ_PATH`
 	Rq_port	string	`envconfig:RQ_PORT`
+	Rp_port	string	`envconfig:RP_PORT`
 }
 
-func geturi () string {
-	goenv := Env{}
-	envconfig.Process("", &goenv)
+func geturi (hostname,protocol,path,port string) string {
 
-	hostname := goenv.Rq_host
-	protocol := goenv.Rq_protocol
-	path := goenv.Rq_path
-	port := goenv.Rq_port
+        if len(hostname) == 0 {
+		fmt.Println("error: environment variable RQ_HOST is empty.")
+		os.Exit(1)
+        }
 
 	if len(protocol) != 0 {
 		if !strings.Contains(protocol,"://") {
@@ -68,15 +67,24 @@ func request (uri string) string {
 	}
 }
 
-
-func handler (w http.ResponseWriter ,r *http.Request ) {
-	fmt.Fprintf(w, "up and running.")
+func healthcheck (resport string) {
+	http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {fmt.Fprintf(w, "{'status':'up'}")})
+	http.ListenAndServe(resport, nil)
 }
 
 func main () {
-	uri := geturi()
+        goenv := Env{}
+        envconfig.Process("", &goenv)
+        hostname := goenv.Rq_host
+        protocol := goenv.Rq_protocol
+        path := goenv.Rq_path
+        reqport := goenv.Rq_port
+        resport := goenv.Rp_port
+
+	uri := geturi(hostname,protocol,path,reqport)
 	fmt.Printf("requesting %s.\n",uri)
-	http.HandleFunc("/", handler)
-	http.ListenAndServe(":3030",nil)
-	request(uri)
+
+	go request(uri)
+	healthcheck(":"+resport)
+
 }
