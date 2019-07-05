@@ -63,7 +63,8 @@ func request (uri string) string {
 	                fmt.Println("Get Error in parsing received data.")
 			continue
 	        }
-		fmt.Println(string(byteArray))
+		fmt.Printf("[ ENDPOINT ] %s\n",uri)
+		fmt.Printf("[ RESULT   ] %s \n",string(byteArray))
 	}
 }
 
